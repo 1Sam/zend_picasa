@@ -1,0 +1,47 @@
+<include target="_header.html" />
+<!--@if($grant->photolist && $album)-->
+<!--#include("./_style.photo.html")-->
+<!--@end-->
+
+
+<div class="btn-toolbar pull-right" role="toolbar" aria-label="a">
+    <div class="btn-group" role="group" aria-label="b">
+      <a href="{getUrl('mid',$mid,'act','','album','','page','')}" class="btn btn-default"><span>{$lang->cmd_listalbum}</span></a>
+    </div>
+
+    <div class="btn-group" role="group" aria-label="c">
+
+		<!--@if($grant->manager)-->
+	        <a href="{getUrl('act','dispZend_picasaModifyAlbum','mid',$mid)}" class="btn btn-default"><span>앨범 수정</span></a>
+    	    <a href="{getUrl('act','dispZend_picasaAddAlbum','mid',$mid)}" class="btn btn-default"><span>{$lang->cmd_album}</span></a>
+			<!--@if(!$total_count)-->
+				<a href="{getUrl('act','dispZend_picasaDeleteAlbum','mid',$mid,'album',$album)}" class="btn btn-default"><span>{$lang->cmd_deletealbum}</span></a>
+			<!--@end-->
+		<!--@end-->
+
+		<!--@if($grant->write_photo)-->	
+			<a href="{getUrl('act','dispZend_picasaAddPhoto','mid',$mid,'album',$album,'page',$page)}" class="btn btn-default"><span>{$lang->cmd_photowrite}</span></a>
+		<!--@end-->
+
+		<!--@if($grant->manager && $module_info->zend_picasa_caching_interval>0)-->
+			<a href="{getUrl('act','procZend_picasaDeleteCache','mid',$mid,'album',$album,'page',$page)}" onclick="return confirm('{$lang->confirmdelcache}')" class="bbtn btn-default"><span>{$lang->del_cache}</span></a>
+		<!--@end-->
+
+    </div>
+</div>
+
+	 <div class="pagination a1">
+        <a href="{getUrl('page','','document_srl','','division',$division,'last_division',$last_division)}" class="prevEnd">{$lang->first_page}</a>
+        <!--@while($page_no = $page_navigation->getNextPage())-->
+            <!--@if($page == $page_no)-->
+                <strong>{$page_no}</strong>
+            <!--@else-->
+                <a href="{getUrl('page',$page_no,'document_srl','','division',$division,'last_division',$last_division)}">{$page_no}</a>
+            <!--@end-->
+        <!--@end-->
+        <a href="{getUrl('page',$page_navigation->last_page,'document_srl','','division',$division,'last_division',$last_division)}" class="nextEnd">{$lang->last_page}</a>
+    </div>
+
+
+
+<!--#include("_footer.html")-->
