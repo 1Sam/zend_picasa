@@ -1,0 +1,76 @@
+<form action="./" method="get" class="boardListForm">
+    <fieldset>
+        <legend style="display:none">List of Articles</legend>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+  				<div class="row">
+					<div class="col-md-6">
+						<p class="pull-left" data-toggle="tooltip" data-placement="top" title="Album List of {$zend_picasa->title} ({$zend_picasa->nickname})">
+							<span class="label label-info">{$title}</span>
+							<!--@if($total_count && $album)-->
+							  {$album} : {$lang->count_photos} <strong>{number_format($total_count)}</strong>
+							<!--@elseif($album)-->
+							  {$album}
+							<!--@elseif($total_count)-->
+							  {$lang->count_album} <strong>{number_format($total_count)}</strong>
+							<!--@end-->
+						</p>
+					</div>
+					<div class="col-md-6">
+						<!--@if(!$zend_picasa->access)-->
+                        <!--@if($grant->manager)-->
+                        <a href="{getUrl('mid',$mid,'act','procZend_picasaMakePublic','album',$album)}" onclick="return confirm('{$lang->msg_changepublic}')"><img src="images/common/lock.png" border=0 alt="{$lang->private}"></a>
+						<a href="{getUrl('mid',$mid, 'page','1','act','dispZend_picasaDeleteAlbum','album',$album)}"><img src="images/common/del.png" border=0 alt="{$cmd_deletealbum}"></a>
+                        <!--@else-->
+                        <img src="images/common/lock.png" border=0 alt="{$lang->private}">
+                        <!--@end-->
+                    <!--@else-->
+                        <!--@if($grant->manager)-->
+                        <a href="{getUrl('mid',$mid,'act','dispZend_picasaModifyAlbum','album',$album)}"><img src="images/common/modifyalbum.png" border=0 alt="{$lang->modifyalbum}"></a>
+                        <!--@else-->
+                        <img src="images/common/modifyalbum.png" border=0 alt="{$lang->public}">
+                        <!--@end-->
+                    <!--@end-->
+					</div>
+				</div>
+			</div>
+
+			<!--@if(!$zend_picasa)-->
+				  <table cellspacing="0" border="1" summary="List of Articles" class="boardList">
+				  <tr>
+					  <td colspan="{$_col_count}">
+						  {$lang->no_documents}
+					  </td>
+				  </tr>
+				  </table>
+			<!--@else-->
+		    <div class="clearfix"></div>
+			<div class="panel-body">
+				<div id="thumbs" style="position:relative">
+				<!--@foreach($zend_picasa->entry as $entry)-->
+					<div class="col-md-2 col-sm-3" id="thumbnail_box">
+						<div class="thumb_item">
+							<!--@if($entry->thumb_url)-->
+								<a href="{getUrl('mid',$mid,'photoid',$entry->photoid,'album',$album,'act','dispZend_picasaViewPhoto')}"><img class="img-responsive" src="{$entry->thumbnail}" alt="{$entry->thumb_url}" /></a>
+							<!--@end-->
+							<div class="zend_sheet pull-left label label-info">{$entry->numphotos}</div>
+							<div class="zend_title title">
+							<!--@if($entry->access)-->
+								<a href="{getUrl('mid',$mid,'album',$entry->albumid,'act','dispZend_picasaListPhoto')}">{$entry->albumtitle}</a>
+							<!--@else-->{$entry->albumtitle}<!--@end-->
+							</div>
+							<div class="zend_title title">
+								<a href="{getUrl('mid',$mid,'album',$album,'photoid',$entry->photoid,'act','dispZend_picasaViewPhoto')}">{$entry->title}</a>
+								<div>
+									{zdate($entry->regdate,"m-d H:i")} <span class="replyAndTrackback" title="Replies"><strong>[{$entry->commentcount}]</strong></span>
+								</div>
+							</div>    
+						</div> <!--/.masonry-brick -->
+					</div>
+                <!--@end-->
+            	</div>
+	        <!--@end-->
+			</div>
+		</div>
+    </fieldset>
+</form>
