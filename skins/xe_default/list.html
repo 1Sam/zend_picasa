@@ -30,18 +30,23 @@
     </div>
 </div>
 
-	 <div class="pagination a1">
-        <a href="{getUrl('page','','document_srl','','division',$division,'last_division',$last_division)}" class="prevEnd">{$lang->first_page}</a>
-        <!--@while($page_no = $page_navigation->getNextPage())-->
-            <!--@if($page == $page_no)-->
-                <strong>{$page_no}</strong>
-            <!--@else-->
-                <a href="{getUrl('page',$page_no,'document_srl','','division',$division,'last_division',$last_division)}">{$page_no}</a>
-            <!--@end-->
-        <!--@end-->
-        <a href="{getUrl('page',$page_navigation->last_page,'document_srl','','division',$division,'last_division',$last_division)}" class="nextEnd">{$lang->last_page}</a>
-    </div>
 
+
+
+    <div class="clearfix"></div>
+
+<div class="boardNavigation">
+    <ul class="pagination pagination-sm">
+        <li><a href="{getUrl('page','','document_srl','','division',$division,'last_division',$last_division)}">&laquo; {$lang->first_page}</a></li> 
+        <li loop="$page_no=$page_navigation->getNextPage()" class="active"|cond="$page==$page_no">
+            <a cond="$apage==$page_no" >{$page_no}</a>
+            <a cond="$apage!=$page_no" href="{getUrl('page',$page_no,'document_srl','','division',$division,'last_division',$last_division)}">{$page_no}</a>
+        </li>
+        <li><a href="{getUrl('page',$page_navigation->last_page,'document_srl','','division',$division,'last_division',$last_division)}">{$lang->last_page} &raquo;</a></li>
+    </ul>
+
+</div>
+    <div class="clearfix"></div>
 
 
 <!--#include("_footer.html")-->
