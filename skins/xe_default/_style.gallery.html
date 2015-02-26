@@ -1,0 +1,98 @@
+<form action="./" method="get" class="zendListForm">
+    <fieldset>
+        <legend style="display:none">List of Articles</legend>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+  
+  				<div class="row">
+					<div class="col-md-6">
+						<p class="pull-left" data-toggle="tooltip" data-placement="top" title="Album List of {$zend_picasa->title} ({$zend_picasa->nickname})">
+							<!--@if($total_count && $album)-->
+							  {$album} : {$lang->count_photos} <strong>{number_format($total_count)}</strong>
+							<!--@elseif($album)-->
+							  {$album}
+							<!--@elseif($total_count)-->
+							  {$lang->count_album} <strong>{number_format($total_count)}</strong>
+							<!--@end-->
+						</p>
+					</div>
+<style>
+.panel .progress {margin-bottom:0;}
+</style>		
+					<div class="col-md-6">
+						<div class="progress">
+							<div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="{$zend_picasa->quotaused}" aria-valuemin="0" aria-valuemax="100" style="width: {$zend_picasa->quotaused}%" data-toggle="tooltip" data-placement="top" title="{$zend_picasa->quotacurrent}M">{$zend_picasa->quotaused}%</div>
+							<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="{100 - $zend_picasa->quotaused}" aria-valuemin="0" aria-valuemax="100" style="width: {100 - $zend_picasa->quotaused}%" data-toggle="tooltip" data-placement="top" title="{$zend_picasa->quotalimit}M">{100 - $zend_picasa->quotaused}%</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+            <!--@if(!count($zend_picasa->entry))-->
+            <table cellspacing="0" border="1" summary="List of Articles" class="boardList">
+                <tr>
+                    <td colspan="{$_col_count}">
+                        {$lang->no_documents}
+                    </td>
+                </tr>
+            </table>
+            <!--@else-->
+
+		    <div class="clearfix"></div>
+			<div class="panel-body">
+				<div id="thumbs" style="position:relative">
+					<!--@foreach($zend_picasa->entry as $entry)-->
+						<div class="col-md-2 col-sm-3" id="thumbnail_box">
+							<div class="thumb_item">
+		
+		
+								<!--@if($entry->thumb)-->
+									<!--@if($entry->access || $grant->manager)-->
+										<a href="{getUrl('mid',$mid,'album',$entry->albumid,'act','dispZend_picasaListPhoto')}">
+											<img src="{$entry->thumb}" alt="{$entry->albumtitle}" />
+										</a>
+									<!--@else-->
+										<img class="img-responsive" src="{$entry->thumb}" alt="{$entry->albumtitle}" />
+									<!--@end-->
+								<!--@end-->
+								<div class="zend_sheet pull-left label label-info">{$entry->numphotos}</div>
+								<div class="zend_title title">
+								<!--@if($entry->access)-->
+								<a href="{getUrl('mid',$mid,'album',$entry->albumid,'act','dispZend_picasaListPhoto')}">{$entry->albumtitle}</a>
+								<!--@else-->
+								{$entry->albumtitle}
+								<!--@end-->
+								</div>
+		
+							</div>
+		
+							<div id="control">
+								<div class="votenumber">{$entry->numphotos}{$lang->sheet}</div>
+								<div class="votebutton" id="xvote-554">
+		
+									<!--@if(!$entry->access)-->
+										<!--@if($grant->manager)-->
+										<a class="btn btn-mini" href="{getUrl('mid',$mid,'act','procZend_picasaMakePublic','album',$entry->albumid)}" onclick="return confirm('{$lang->msg_changepublic}')" alt="{$lang->private}"><i class="fa fa-lock fa-lg"></i></a>
+										<a class="btn btn-mini" href="{getUrl('mid',$mid, 'page','1','act','dispZend_picasaDeleteAlbum','album',$entry->albumid)}" alt="{$cmd_deletealbum}"><i class="fa fa-trash-o fa-lg"></i></a>
+										<a class="btn btn-mini" href="{getUrl('mid',$mid,'act','dispZend_picasaModifyAlbum','album',$entry->albumid)}" alt="{$lang->modifyalbum}"><i class="fa fa-pencil-square-o fa-lg"></i></a>
+										<!--@else-->
+										<img src="images/common/lock.png" border=0 alt="{$lang->private}">
+										<!--@end-->
+									<!--@else-->
+										<!--@if($grant->manager)-->
+										<a href="{getUrl('mid',$mid,'act','dispZend_picasaModifyAlbum','album',$entry->albumid)}"><img src="images/common/modifyalbum.png" border=0 alt="{$lang->modifyalbum}"></a>
+										<!--@else-->
+										<img src="images/common/modifyalbum.png" border=0 alt="{$lang->public}">
+										<!--@end-->
+									<!--@end-->
+		
+								</div><!-- /.votebutton -->
+							</div> <!-- /#control -->
+						</div>
+					<!--@end-->
+				</div>
+			</div>
+            <!--@end-->
+		</div>
+	</fieldset>
+</form>
