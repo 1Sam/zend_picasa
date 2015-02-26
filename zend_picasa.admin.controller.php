@@ -50,8 +50,8 @@ class zend_picasaAdminController extends zend_picasa {
 		// Get the basic information
 		//$args = Context::getRequestVars();
 
-		$oModuleModel = &getModel('module');
-		$zend_picasa_config = $oModuleModel->getModuleConfig('zend_picasa');
+		//$oModuleModel = &getModel('module');
+		//$zend_picasa_config = $oModuleModel->getModuleConfig('zend_picasa');
 		$oModuleController = &getController('module');
 
 		$zend_picasa_config->use = Context::get('use');
@@ -60,6 +60,7 @@ class zend_picasaAdminController extends zend_picasa {
 		$zend_picasa_config->maxsize = Context::get('maxsize');
 		$zend_picasa_config->thumbsize = Context::get('thumbsize');
 		$zend_picasa_config->delete = Context::get('delete');
+		$zend_picasa_config->is_save = Context::get('is_save');
 
 		// 개별 mid 는 2개 이상의 구글 계정이 필요할 경우에 생성하도록 할 예정임
 		$zend_picasa_config->mid = Context::get('mid');
@@ -95,6 +96,44 @@ class zend_picasaAdminController extends zend_picasa {
 		$this->add('module','zend_picasa');
 		$this->setMessage('success_deleted');
 	}
+
+	function procZend_picasaAdmin_move_to_picasa() {
+
+		$args = new stdClass;
+		$args->comment = '';
+		$args->isvalid = "Y";
+		$args->direct_download = "Y";
+		$args->file_size = 1;
+		$args->source_filename1 = ".png";
+		$args->source_filename2 = ".jpg";
+		$args->source_filename3 = ".bmp";
+		$args->source_filename4 = ".gif";
+
+		// 피카사에 올릴 파일 목록		
+		$output = executeQuery('zend_picasa.getFiles', $args);
+
+		$files = $output->data;
+
+		/*[0] => stdClass Object
+			(
+				[upload_target_srl] => 68
+				[module_srl] => 67
+				[source_filename] => Move-9.png
+				[uploaded_filename] => ./files/attach/images/67/068/e6ceefb587fecc426ba4fcb318f94ec2.png
+				[member_srl] => 4
+			)*/
+
+		$oZend_picasaModel = &getModel('zend_picasa');	
+			
+
+		foreach($files as $file) {
+			$oZend_picasaModel->zend_picasa_upload($file_info, $module_srl, $upload_target_srl);
+		}
+
+
+
+	}
+
 
 }
 ?>
