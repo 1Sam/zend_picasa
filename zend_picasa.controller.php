@@ -13,9 +13,11 @@ class zend_picasaController extends zend_picasa {
 	 **/
 
 	function init() {
-		$clientLibraryPath = realpath('./modules/zend_picasa');
+		/*$clientLibraryPath = realpath('./modules/zend_picasa');
 		$oldPath = set_include_path(get_include_path() . PATH_SEPARATOR . $clientLibraryPath);
-		require_once 'Zend/Loader.php';
+		require_once 'Zend/Loader/Autoloader.php';
+		Zend_Loader_Autoloader::getInstance();*/
+		/*require_once 'Zend/Loader.php';
 		Zend_Loader::loadClass('Zend_Gdata');
 		Zend_Loader::loadClass('Zend_Gdata_Query'); // 보류
 		Zend_Loader::loadClass('Zend_Gdata_ClientLogin');
@@ -24,10 +26,7 @@ class zend_picasaController extends zend_picasa {
 		Zend_Loader::loadClass('Zend_Gdata_Photos_UserQuery');
 		Zend_Loader::loadClass('Zend_Gdata_Photos_AlbumQuery');
 		Zend_Loader::loadClass('Zend_Gdata_Photos_PhotoQuery');
-		Zend_Loader::loadClass('Zend_Gdata_App_Extension_Category');
-
-		$oModuleModel = &getModel('module');
-		$this->config = $oModuleModel->getModuleConfig('zend_picasa');
+		Zend_Loader::loadClass('Zend_Gdata_App_Extension_Category');*/
 	}
 
 	function procZend_picasaUpload() {
@@ -265,6 +264,14 @@ class zend_picasaController extends zend_picasa {
 	}
 
 
+	/**
+	 * @brief 글쓰기 상태에서 uploader.js 의 defaultHandlers 변수값을 다시 정의하도록 변경된 js 파일을 html에 삽입합니다.
+	 **/
+	function triggerDisplay(&$output) {
+		if(Context::get('act') == 'dispBoardWrite') {
+			Context::addJsFile('./modules/zend_picasa/tpl/js/zend_picasa.js', NULL, NULL, NULL, 'body');
+		}
+	}
 
 
 	/**
@@ -272,27 +279,25 @@ class zend_picasaController extends zend_picasa {
 	 * 트리거 이후의 내용은 건너 뛰게 됨
 	 **/
 	function triggerInsertFile(&$trigger_obj) {
-		if($config->use == 'N') return;
 
-		// 파일정보는 insertFile 함수에서 보내주지 않음
-		// 직접 웹페이지의 변수를 받아옴
+		//** zend_picasa 모듈을 사용하는지 확인
+		if(($this->config->use == 'N')) return;
+
+		//** 파일정보는 트리거로 연결된 file 모듈의 insertFile 함수에서 보내주지 않음
+		//** 따라서 직접 웹페이지의 변수를 GET로 받아옴
 		$vars = Context::getRequestVars();
 		$file_info = $vars->Filedata;
-
+		
+		//$oZend_picasaModel = new zend_picasaModel();
+		//$output = zend_picasaModel::zend_picasa_upload($file_info, $trigger_obj->module_srl,$trigger_obj->upload_target_srl);
 		$oZend_picasaModel = getModel('zend_picasa');
-		$config = $oZend_picasaModel->init();
-
 		$output = $oZend_picasaModel->zend_picasa_upload($file_info, $trigger_obj->module_srl,$trigger_obj->upload_target_srl);
 		
+		//** file.insertFile 함수를 중단
 		// 트리거 before에서 중단하기 위해 error값 -1을 넣어줌
 		// 피카사에만 업로드되며 DB는 피카사 파일값이 저장됨
 		$output->error =  $output->toBool() ? -1 : 0;
 
-		$myFile = "testFilefinal.txt";
-		$fh = fopen($myFile, 'w') or die("can't open file");
-		$stringData = print_r($vars,true). print_r($output,true);
-		fwrite($fh, $stringData);
-		fclose($fh);
 
 		/*//$oModuleModel = &getModel('Module');
 		//$triggers = $oModuleModel->getTriggers('file.insertFile', 'after');
@@ -321,28 +326,42 @@ class zend_picasaController extends zend_picasa {
 
 
 	function triggerFiledeleteFile(&$trigger_obj) {
+		//$oModuleModel = &getModel('module');
+		//$this->config = $oModuleModel->getModuleConfig('zend_picasa');
+
+			/*$myFile = "testFile_delete2_".$trigger_obj->sid.".txt";
+			$fh = fopen($myFile, 'w') or die("can't open file");
+			$stringData =  'hi'.print_r($trigger_obj,true).print_r(Context::get('act'),true);
+			fwrite($fh, $stringData);
+			fclose($fh);*/
+		//Context::addJsFile("./modules/zend_picasa/tpl/js/zend_picasa.js", true, '', -100005);
+			
+		if((Context::get('act') == 'procBoardDeleteDocument')) return;
+		//$this->init();
+
+		if(($this->config->use == 'N' || $this->config->delete == 'N')) return;
 
 		if(strpos($trigger_obj->sid, '#') !== false) {
 							
 			$oZend_picasaModel = getModel('zend_picasa');
-			$config = $oZend_picasaModel->init();
-			if($config->use == 'N' || $config->delete == 'N') return;
+			//$config = $oZend_picasaModel->init();
+			//if($config->use == 'N' || $config->delete == 'N') return;
 
-			$client = $oZend_picasaModel->getClient();
+			//$client = $oZend_picasaModel->getClient();
 
 			//sid 를 분리
 			$sids = explode('#',$trigger_obj->sid);
 			$albumId = $sids[0];
 			$photoId = $sids[1];
 
-			$result = $oZend_picasaModel->deletePhoto($client, $config->user, $albumId, $photoId);
+			$result = $oZend_picasaModel->deletePhoto($client, $this->config->user, $albumId, $photoId);
 
 
-			/*$myFile = "testFile_delete2.txt";				
+			/*$myFile = "testFile_delete_".$photoId.".txt";				
 			$fh = fopen($myFile, 'w') or die("can't open file");
 			$stringData =  'hi'.print_r($result,true);
 			fwrite($fh, $stringData);
-			fclose($fh);*/;
+			fclose($fh);*/
 
 			//$oZend_picasaModel->deletePhoto($client, $config->user, $albumId, $photoid);
 			//$oZend_picasaModel->deleteThumbnail($album,$photoid);
@@ -367,11 +386,11 @@ class zend_picasaController extends zend_picasa {
 		//앨범 숫자코드 가져오기
 		//$album = Context::get('album');
 		$oZend_picasaModel = &getModel('zend_picasa');
-		$config = $oZend_picasaModel->init();
+		//$config = $oZend_picasaModel->init();
 		if($config->use == 'N') return;
 
 		$client = $oZend_picasaModel->getClient();
-		$albumId = $oZend_picasaModel->getAlbumidFromSid($obj->document_srl);
+		$albumId = $oZend_picasaModel->getAlbumidFromSid_($obj->document_srl);
 		
 		// DB에 피카사 이미지가 저장되어 있는지를 검사하고 없으면 종료
 		if(!$albumId) return;
@@ -414,20 +433,21 @@ class zend_picasaController extends zend_picasa {
 	function triggerDeleteDocument(&$trigger_obj) {
 	
 		$oZend_picasaModel = getModel('zend_picasa');
-		$config = $oZend_picasaModel->init();
+		$this->init();
+
+		if($this->config->use == 'N' || $this->config->delete == 'N') return;
+
+		$client = $oZend_picasaModel->getClient();
 
 		//글 삭제할 때 시간이 많이 걸리는 것인지 파일 목록을 미리 살펴야 제대로 작동함
-		$albumId = $oZend_picasaModel->getAlbumidFromSid($trigger_obj->document_srl);
+		$albumId = $oZend_picasaModel->getAlbumidFromSid_($trigger_obj->document_srl);
 		if(!$albumId) {
 			//$trigger_obj->document_srl로 저장된 앨범명으로 앨범 아이디 가져오기
-			$albumId = $oZend_picasaModel->get_albumidByTitle($config->user, $config->pass, $trigger_obj->document_srl);
+			//약간 위험함, 동일 앨범명이 존재할 경우 뒤섞임
+			$albumId = $oZend_picasaModel->get_albumidByTitle($client, $this->config->user, $this->config->pass, $trigger_obj->document_srl);
+			if(!$albumId) return NULL;
+		// DB에 피카사 이미지가 저장되어 있는지를 검사하고 없으면 종료
 		}
-		
-		if(!$albumId) return;
-		
-		if($config->use == 'N' || $config->delete == 'N') return;
-
-
 		
 		/*$myFile = "testFile_deletattached.txt";
 		$fh = fopen($myFile, 'w') or die("can't open file");
@@ -435,12 +455,17 @@ class zend_picasaController extends zend_picasa {
 		fwrite($fh, $stringData);
 		fclose($fh);*/
 		
-		// DB에 피카사 이미지가 저장되어 있는지를 검사하고 없으면 종료
-		if(!$albumId) return;
+		
+		// NULL 로 돌아옴
+		$output = $oZend_picasaModel->deleteAlbum($client, $this->config->user, $albumId);
 
-		$client = $oZend_picasaModel->getClient();
-		$output = $oZend_picasaModel->deleteAlbum($client, $config->user, $albumId);
-		return;
+		$myFile = "testFile_deletattached.txt";
+		$fh = fopen($myFile, 'w') or die("can't open file");
+		$stringData = print_r($trigger_obj,true).'앨범아이디'. print_r($albumId,true). '//'.print_r($output,true).print_r($this,true);
+		fwrite($fh, $stringData);
+		fclose($fh);
+
+		return new Object(0, '$output');
 	}
 
 
@@ -1026,6 +1051,7 @@ class zend_picasaController extends zend_picasa {
 
 							//$obj->content = str_replace($source_filename, $target_filename, $obj->content);
 
+
 						} else {
 							$inserted_file = $oFileController->insertFile($file_info, $module_srl, $obj->document_srl, $val->download_count, true);
 	
@@ -1237,6 +1263,4 @@ class zend_picasaController extends zend_picasa {
 		$output->add('copied_srls', $copied_srls);
 		return $output;
 	}
-
-
 }
