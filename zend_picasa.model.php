@@ -11,9 +11,8 @@ class zend_picasaModel extends zend_picasa {
 	 * @brief Initialization
 	 **/
 	function init() {
-		$clientLibraryPath = realpath($this->module_path);
 		//$clientLibraryPath = realpath('./modules/zend_picasa');
-        $oldPath = set_include_path(get_include_path() . PATH_SEPARATOR . $clientLibraryPath);
+        //$oldPath = set_include_path(get_include_path() . PATH_SEPARATOR . realpath($this->module_path));
 
 /*		$myFile = "testFilex.txt";
 		$fh = fopen($myFile, 'w') or die("can't open file");
@@ -21,7 +20,9 @@ class zend_picasaModel extends zend_picasa {
 		fwrite($fh, $stringData);
 		fclose($fh);*/
 
-        require_once 'Zend/Loader.php';
+/*		require_once 'Zend/Loader/Autoloader.php';
+		Zend_Loader_Autoloader::getInstance();*/
+        /*require_once 'Zend/Loader.php';
         Zend_Loader::loadClass('Zend_Gdata');
 		Zend_Loader::loadClass('Zend_Gdata_Query'); // 보류
         Zend_Loader::loadClass('Zend_Gdata_ClientLogin');
@@ -32,7 +33,7 @@ class zend_picasaModel extends zend_picasa {
 		// get_albumid 필수
         Zend_Loader::loadClass('Zend_Gdata_Photos_UserQuery');
         Zend_Loader::loadClass('Zend_Gdata_Photos_PhotoQuery');
-        Zend_Loader::loadClass('Zend_Gdata_App_Extension_Category'); //역할 모름
+        Zend_Loader::loadClass('Zend_Gdata_App_Extension_Category'); //역할 모름*/
 
 /*		require_once 'Zend/Loader.php';
 		Zend_Loader::loadClass('Zend_Gdata_Photos');
@@ -44,22 +45,71 @@ class zend_picasaModel extends zend_picasa {
 		Zend_Loader::loadClass('Zend_Gdata_Photos_UserQuery');
 		Zend_Loader::loadClass('Zend_Gdata_Photos_AlbumQuery');
 		Zend_Loader::loadClass('Zend_Gdata_Photos_PhotoQuery');*/
+	}
+	
+	
+	function getgp() {
 
-		$oModuleModel = &getModel('module');
-		$this->config = $oModuleModel->getModuleConfig('zend_picasa');
-		return $this->config;
+		/*if(!$this->config->user) {
+			$this->init();
+		}*/
+		//if($this->client) return $client;
+
+
+		//HTTP認証オブジェクトの作成
+		$service = Zend_Gdata_Photos::AUTH_SERVICE_NAME;// Zend_Gdata_Spreadsheets::AUTH_SERVICE_NAME; //
+
+		//if(!$this->config->user || !$this->config->pass) return new Object(-1, 'msg_module_not_configured');
+			//@set_time_limit(0);
+		try {
+			$client = Zend_Gdata_ClientLogin::getHttpClient($this->config->user, $this->config->pass , $service);
+			//@set_time_limit(0);
+		} catch (Zend_Gdata_App_AuthException $e) {
+			$myFile = "testFilealbumnamez1.txt";
+			$fh = fopen($myFile, 'w') or die("can't open file");
+			$stringData = 'Picasa AlbumName : '. print_r($e,true);
+			fwrite($fh, $stringData);
+			fclose($fh);
+        //echo "Error:0 " . $e->getResponse();
+			return new Object(-1,'LoginFailed'.'hi');
+		} catch (Zend_Gdata_App_HttpException $e) {
+			$myFile = "testFilealbumnamez2.txt";
+			$fh = fopen($myFile, 'w') or die("can't open file");
+			$stringData = 'Picasa AlbumName : '. print_r($e,true);
+			fwrite($fh, $stringData);
+			fclose($fh);
+
+        	$client = $this->getClient_onecemore($this->config->user, $this->config->pass , $service);
+
+			//echo "Error:1 " . $e->getResponse();
+			if(!$client) return new Object(-1,'NetworkError'.'hi1');
+		}
+		try {
+		$this->gp = new Zend_Gdata_Photos($client);
+
+		} catch (Zend_Gdata_App_HttpException $e) {
+			return new Object(-1,'aaaa');//$this->dispZend_picasaMessage('msg_module_not_configured');
+		} catch (Zend_Gdata_App_Exception $e) {
+			return new Object(-1,'bbbb');//$this->dispZend_picasaMessage('msg_module_not_configured');
+		}
+        
+		return $this->gp;
 	}
 
 	// readme_Zend_Gdata_HttpClient.txt 값으로 리턴되어 옴. 꼭 읽어보세요.
 
 	function getClient() {
+		
+
 		if(!$this->config->user) {
 			$oModuleModel = &getModel('module');
 			$this->config = $oModuleModel->getModuleConfig('zend_picasa');
-	
 			//$sUser = $config->user; //GoogleApps OR GoogleAccountのメアド
 			//$sPass = $config->pass; //"p@ssw0rd"; //上記メアドのログインパスワード
 		}
+		if($this->client) return $client;
+
+
 		//HTTP認証オブジェクトの作成
 		$sAuthServiceName = Zend_Gdata_Photos::AUTH_SERVICE_NAME;// Zend_Gdata_Spreadsheets::AUTH_SERVICE_NAME; //
 
@@ -88,7 +138,8 @@ class zend_picasaModel extends zend_picasa {
 			//echo "Error:1 " . $e->getResponse();
 			if(!$client) return new Object(-1,'NetworkError'.'hi1');
 		}
-
+		
+		$this->client = $client;
 		return $client;
 	}
 	
@@ -171,16 +222,17 @@ class zend_picasaModel extends zend_picasa {
 			$albumQuery->setType('entry');
 	
 			$entry = $photos->getAlbumEntry($albumQuery);
-			$cache_file = "./files/cache/zend_picasa/zend_picasa.*.cache.php";
+			/*$cache_file = "./files/cache/zend_picasa/zend_picasa.*.cache.php";
 			foreach (glob($cache_file) as $filename) {
 			   unlink($filename);
-			}
-			return $photos->deleteAlbumEntry($entry, true);
+			}*/
+			$photos->deleteAlbumEntry($entry, true);
 		} catch (Zend_Gdata_App_HttpException $e) {
 			// 피카사 앨범을 임의로 삭제한 경우, 블로그의 글을 삭제할 때 에러가 발생하기에
 			// try로 오류 무시
-			return new Object(-1,'NetworkError');
-		} 
+			return new Object(-1,'NetworkError'.'앨범삭제시에 문제가 있습니다.'.$e.$entry);
+		}
+		return new Object(0, '앨범 삭제 성공');
     }
 
 	function addPhoto($client, $user, $albumId, $title, $photo, $caption, $tags) {
@@ -210,24 +262,24 @@ class zend_picasaModel extends zend_picasa {
 		$albumQuery->setAlbumId($albumId);
 
 		// 사진추가시 서버에 임시저장된 이미지 파일 제거
-		$cache_file = sprintf("./files/cache/zend_picasa/%s.*.cache.php", $albumId);
+		/*$cache_file = sprintf("./files/cache/zend_picasa/%s.*.cache.php", $albumId);
 		foreach (glob($cache_file) as $filename) {
            unlink($filename);
-        }
+        }*/
 
 // We insert the photo, and the server returns the entry representing
 		// that photo after it is uploaded
 		$result = $photos->insertPhotoEntry($photoEntry, $albumQuery->getQueryUrl()); 
-        $content = $result->mediaGroup->content;
-        $tmp = $content[0];
+        //$content = $result->mediaGroup->content;
+        //$tmp = $result->mediaGroup->content[0];
         //$output->url =$tmp->url;
 		$output->photoId = $result->gphotoId->text;
         $output->width = $result->gphotoWidth->text;//$tmp->width;
         $output->height = $result->gphotoHeight->text;//$tmp->height;
-		$output->size = print_r($result->gphotoSize->text, true);
+		$output->size = $result->gphotoSize->text;//, true);
 		//$output->title = $result->title->text;
 		//$output->urlencoded=urlencode( $output->title);
-		$output->url = str_replace(basename($tmp->url),'s0/'.$result->title->text,$tmp->url);
+		$output->url = str_replace(basename($result->content->src),'s0/'.$result->title->text,$result->content->src);
 
 		//$output->replcased= str_replace($output->urlencoded,'',$output->url);
 
@@ -249,23 +301,34 @@ class zend_picasaModel extends zend_picasa {
 
 
 	function deletePhoto($client, $user, $albumId, $photoId) {
-        $photos = new Zend_Gdata_Photos($client);
 
-        $photoQuery = new Zend_Gdata_Photos_PhotoQuery;
-        $photoQuery->setUser($user);
-        $photoQuery->setAlbumId($albumId);
-        $photoQuery->setPhotoId($photoId);
-        $photoQuery->setType('entry');
-
-        $entry = $photos->getPhotoEntry($photoQuery);
-
-        $result = $photos->deletePhotoEntry($entry, true);
-		$cache_file = sprintf("./files/cache/zend_picasa/%s.*.cache.php", $albumId);
+		if(!$this->gp) $this->getgp();
+        //$photos = new Zend_Gdata_Photos($client);
+		$photos = $this->getgp();
+		try {
+			$photoQuery = new Zend_Gdata_Photos_PhotoQuery;
+			$photoQuery->setUser($user);
+			$photoQuery->setAlbumId($albumId);
+			$photoQuery->setPhotoId($photoId);
+			$photoQuery->setType('entry');
+	
+			$entry = $photos->getPhotoEntry($photoQuery);
+	
+			$result = $photos->deletePhotoEntry($entry, true);
+		/*$cache_file = sprintf("./files/cache/zend_picasa/%s.*.cache.php", $albumId);
         foreach (glob($cache_file) as $filename) {
            unlink($filename);
-        }
-		return $result;
+        }*/
 
+ 		} catch (Zend_Gdata_App_HttpException $e) {
+			/*$myFile = "testFileaddPhoto9.txt";
+			$fh = fopen($myFile, 'w') or die("can't open file");
+			$stringData = 'Picasa AlbumName : '. print_r($e,true).print_r($result,true);
+			fwrite($fh, $stringData);
+			fclose($fh);*/
+			return new Object(-1, $e);
+		}
+		return new Object(0, $result->body);
     }
 
 
@@ -277,28 +340,30 @@ class zend_picasaModel extends zend_picasa {
 
 		$output = executeQueryArray('zend_picasa.getAlbumidFromSid', $args);
 
-
-		/*$myFile = "testFile_albumid_output.txt";
-		$fh = fopen($myFile, 'w') or die("can't open file");
-		$stringData = print_r($output,true);
-		fwrite($fh, $stringData);
-		fclose($fh);*/
-
-		foreach($output->data as $item) {
+		foreach($output->data as $key => $item) {
 			if(strlen($item->sid) != 32) $albumIdx = $item->sid;
 		}
 		$ids = explode('#',$albumIdx);
 		$albumId = $ids[0];
-		/*$myFile = "testFileaddPhoto9.txt";
-		$fh = fopen($myFile, 'w') or die("can't open file");
-		$stringData = 'Picasa AlbumName : '.$albumIdx.'//'.$albumId.'//'. print_r($ids,true);
-		fwrite($fh, $stringData);
-		fclose($fh);*/
 
 		// DB에 저장된 이미지의 sid 값, 없으면 NULL
 		return $albumId; //
 	}
 
+	//DB의 sid에는 albumId#photoId 로 저장되어 있음
+	//2개의 값을 분리하여 앨범 아이디만 리턴
+	function getAlbumidFromSid_($upload_target_srl) {
+		$args = new stdClass();
+		$args->upload_target_srl = $upload_target_srl;
+
+		$output = executeQueryArray('zend_picasa.getAlbumidFromSid', $args);
+
+		foreach($output->data as $item) {
+			if(preg_match("/(\w+)#/i",$item->sid, $matches)) return $matches[1];
+			//if(strpos($item->sid, '#') !== false) return explode('#',$item->sid);
+		}
+		return NULL; //
+	}
 
 	function getUploadTargetBySid($sid) {
 		$args = new stdClass();
@@ -331,14 +396,11 @@ class zend_picasaModel extends zend_picasa {
 
 
 	// 피카사 이미지 게시글을 이동할 때는 files DB 내용만 수정
-	// 이미지 파일은 피카사로, 일반 파일은 호스팅 서버로 업로드 
+	// 이미지 파일은 피카사로, 일반 파일은 호스팅 서버로 업로드 ($output->error = 0)
 	function zend_picasa_upload($file_info, $module_srl, $upload_target_srl) {
 
-
-
-
 		// 이미지 파일은 피카사로 업로드한다.
-		if(preg_match("/\.(jpe?g|gif|png|bmp|jpg)$/i", $file_info['name']))	{
+		if(preg_match("/\.(jpe?g|gif|png|bmp)$/i", $file_info['name']))	{
 
 			// 피카사 용량 무제한의 이미지 규격은 2048*2048
 			// zend_picasa 모듈 옵션에서 최대치를 지정해 줄 수 있음
@@ -360,13 +422,13 @@ class zend_picasaModel extends zend_picasa {
 			$client = $this->getClient();
 			
 			//앨범 아이디가 없으면 새앨범생성후 그 값을 취함
-			$albumId = $this->getAlbumidFromSid($upload_target_srl);
+			$albumId = $this->getAlbumidFromSid_($upload_target_srl);
 			$album_title = $upload_target_srl;
 			if(!$albumId) $albumId = $this->addAlbum($client, $this->config->user, $album_title, 'private');
 
 			/*$myFile = "testFileaddPhoto1.txt";
 			$fh = fopen($myFile, 'w') or die("can't open file");
-			$stringData = 'Picasa AlbumName : '. print_r($albumId,true);
+			$stringData = 'Picasa AlbumName : '. print_r($this,true);
 			fwrite($fh, $stringData);
 			fclose($fh);*/
 
@@ -431,7 +493,7 @@ class zend_picasaModel extends zend_picasa {
 
            	return $output;
 		}
-		 return new Object(-1, '이미지 파일이 아님');
+		return new Object(-1, '이미지 파일이 아님');
 	}
 
 
@@ -445,7 +507,7 @@ class zend_picasaModel extends zend_picasa {
 		$username = "default"; // 유저이름
 		$photoName = $source_filename; // 실제 파일
 		//피카사의 해당 이미지에 실제 이미지 올린 글을 링크하도록 캡션(제목)을 달아 줌
-		$photoCaption = "http://1sam.kr/".$upload_target_srl; 
+		$photoCaption = getUrl().$upload_target_srl; 
 		$photoTags = "XE, 1Samonline, 일쌤온라인";
 		//$albumId = "5836285696291714177";
 		//$tmp_name = $_SERVER['DOCUMENT_ROOT']."/tmp/photo.jpg"; //성공
@@ -464,7 +526,7 @@ class zend_picasaModel extends zend_picasa {
 		// 이미지가 저장될 albumId를 구함
 		// DB에서 해당 게시글의 이미지 파일을 검색하고 sid가 32자리가 아닌 것을 albumId로 취함
 
-		$albumId = $this->getAlbumidFromSid($upload_target_srl);
+		$albumId = $this->getAlbumidFromSid_($upload_target_srl);
 
 
 		if(!$albumId) {
@@ -604,8 +666,8 @@ class zend_picasaModel extends zend_picasa {
 		return $picasa_uploaded_info;
 	}
 
-function get_albumidByTitle($user, $pass, $album_title) {
-		$client = $this->getClient();
+function get_albumidByTitle($client, $user, $pass, $album_title) {
+		//$client = $this->getClient();
 		$gp = new Zend_Gdata_Photos($client);
 
 		// Find the album for the given accountId.
@@ -618,9 +680,10 @@ function get_albumidByTitle($user, $pass, $album_title) {
 		try {
 			$albumFeed = $gp->getAlbumFeed( $albumQuery );
 		  
-			foreach( $albumFeed as $key => $entry ) {
+			/*foreach( $albumFeed as $entry ) {
 				$albumId = $entry->getGphotoAlbumId()->text;
-		}
+			}*/
+			$albumId = $albumFeed->getGphotoAlbumId()->text;
 		} catch( Zend_Gdata_App_Exception $ex ) {
 			//앨범 아이디 받기 실패
 			return false;
