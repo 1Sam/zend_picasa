@@ -1,0 +1,66 @@
+<!--%import("css/zend.css")-->
+<!--%import("css/pagination.css")-->
+<!--%import("css/white.css")-->
+<!--%import("css/style.css")-->
+
+<load target="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.2/js/bootstrap.min.js" />
+<load target="https://cdnjs.cloudflare.com/ajax/libs/masonry/3.2.2/masonry.pkgd.min.js" />
+
+
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/smoothness/jquery-ui.css" media="all" rel="stylesheet" type="text/css" />
+
+<div class="panel panel-default">
+  <div class="panel-heading">에러를 찾기위해 아래의 내용이 잠시 포함되었습니다. xe_default/_header.html</div>
+  <div class="panel-body">
+    02:53:02 // <strong> <?php
+   echo date("F d H:i:s", filemtime("./testFilealbumnamez2.txt"));
+?> </strong>
+  </div>
+</div>
+
+{$module_info->header_text}
+
+<div class="zend_warap">
+	<h2 cond="$module_info->title" class="zendTitleText"><a href="{getUrl('','mid',$mid,'listStyle',$listStyle)}">{$module_info->title}<!--@if($module_info->sub_title)--> : <em>{$module_info->sub_title}</em><!--@end--></a></h2>
+
+	<!--@if($module_info->comment)-->
+	<p class="zendDescription">{$module_info->comment}</p>
+	<!--@end-->
+
+	<!--@if($module_info->display_login_info != 'N' || $module_info->display_setup_button != 'N')-->
+	<div class="alert alert-warning" role="alert">
+		<div class="row">
+
+			<div class="col-md-6">
+				{$module_info->browser_title} <span class="label label-success">{$album}</span>
+				<!--@if($zend_picasa_photo->access=='private')-->
+					<img src="images/common/lock.png" border=0 alt="{$lang->private}">
+				<!--@elseif($zend_picasa_photo->access=='public')-->
+					<img src="images/common/modifyalbum.png" border=0 alt="{$lang->public}">
+				<!--@end-->
+			</div>
+			
+			<div class="col-md-6">
+				<div class="pull-right btn-toolbar" role="toolbar" aria-label="a">
+				<!--@if($is_logged)-->
+					<div class="btn-group" role="group" aria-label="a">
+						<a cond="$grant->manager && $module_info->display_setup_button != 'N'" href="{getUrl('act','dispZend_picasaAdminModule')}" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="{$lang->cmd_setup}"><i class="fa fa-cog fa-lg"></i></a>
+					</div>
+				
+					<div class="btn-group" role="group" aria-label="a">
+						<a cond="$module_info->display_login_info != 'N'" href="{getUrl('act','dispMemberInfo')}" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="{$lang->cmd_view_member_info}"><i class="fa fa-user fa-lg"></i></a>
+						<a cond="$module_info->display_login_info != 'N'" href="{getUrl('act','dispMemberLogout')}" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="{$lang->cmd_logout}"><i class="fa fa-sign-in fa-lg"></i></a>
+					</div>
+					<div class="btn-group" role="group" aria-label="a">
+						<a cond="!$is_logged && $module_info->display_login_info != 'N'" href="{getUrl('act','dispMemberSignUpForm')}" class="btn btn-default"><span>{$lang->cmd_signup}</span></a>
+						<a cond="!$is_logged && $module_info->display_login_info != 'N'" href="{getUrl('act','dispMemberLoginForm')}" class="btn btn-default" data-toggle="tooltip" data-placement="top" title="{$lang->cmd_login}"><i class="fa fa-sign-in fa-lg"></i></a>
+					</div>
+					<div class="btn-group" role="group" aria-label="a">
+						<a href="{getUrl('','module','module','act','dispModuleSkinInfo','selected_module',$module_info->module, 'skin', $module_info->skin)}" class="btn btn-default" onclick="popopen(this.href,'skinInfo'); return false;"  data-toggle="tooltip" data-placement="top" title="Contributor"><i class="fa fa-question-circle fa-lg"></i></a>
+					</div>
+				<!--@end-->
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--@end-->
