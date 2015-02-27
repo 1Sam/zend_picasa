@@ -1,0 +1,96 @@
+<include target="_header.html" />
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+
+		<div class="row">
+			<div class="col-md-6">
+				<p class="pull-left" data-toggle="tooltip" data-placement="top" title="Album List of {$zend_picasa->title} ({$zend_picasa->nickname})">
+	<a href="{$zend_picasa_photo->link_url}" target=_blank>
+	<img src="images/common/google.png" border=0></a>
+	<span class="label label-info">{$zend_picasa_photo->title}</span>
+{$lang->readed_count} : {$zend_picasa_photo->viewcount}
+				</p>
+
+			</div>
+
+			<div class="col-md-6">
+
+			</div>
+		</div>
+	</div>
+
+	<div class="panel-body">
+			<strong>Caption : </strong>
+				<!--@if(strpos($zend_picasa_photo->summary, 'http') !== false)-->
+				<a class="btn btn-danger" href="{$zend_picasa_photo->summary}">{$zend_picasa_photo->summary}</a>
+				<!--@else-->
+				{$zend_picasa_photo->summary}
+				<!--@endif-->
+
+			<span class="label label-default pull-right"> {zdate($zend_picasa_photo->regdate,"Y-m-d H:i:s")}</span>
+	</div>
+
+	<ul class="list-group">
+		<!--@if($grant->view && $album && $photoid)-->
+
+		<li class="list-group-item">
+			<div class="xe_content">
+					<a href="{str_replace(basename($zend_picasa_photo->url), 's0/', $zend_picasa_photo->url)}"><img src='{$zend_picasa_photo->url}' /></a>
+	
+			</div>
+		</li>
+		<li class="list-group-item">
+		<div class="boardReadBody">
+			<h3 class='nopad'>Tags : </h3>
+			<ul>
+				<!--@foreach($zend_picasa_photo->tag as  $entry)-->
+				<span class="label label-default">{$entry->title} {$entry->content}</span>&nbsp;
+				<!--@end-->
+				<!--@if($grant->manager)-->
+				<!--#include("tag_form.html")-->
+				<!--@end-->
+			</ul>
+		</div>
+		</li>
+		<li class="list-group-item">
+			<div class="boardReadFooter">
+				<h3 class='nopad'>Comments : </h3>
+		
+				<ul>
+				<!--@foreach($zend_picasa_photo->zend_picasa as  $entry)-->
+					<li>
+					{zdate($entry->regdate,"Y-m-d H:i:s")}
+					{$entry->content} <!--@if($grant->manager)--><a href="{getUrl('act','procZend_picasaDeleteComment','mid',$mid,'album',$album,'photoid',$photoid,'comment',$entry->gphotoid)}" onclick="return confirm('{$lang->confirmdelete}')"><span><img src="images/common/del2.png" border=0></span></a><!--@end-->
+					</li>
+				<!--@end-->
+				<!--@if($grant->write_comment)-->
+					<!--#include("comment_form.html")-->
+				<!--@end-->
+				</ul>
+			</div>
+		</li>
+		<!--@end-->
+		<li class="list-group-item">
+			<div class="boardNavigation">
+				<div class="buttonLeft">
+					<a href="{getUrl('mid',$mid,'act','','album','','page','','photoid','')}" class="button green strong"><span>{$lang->cmd_listalbum}</span></a>
+					<a href="{getUrl('','mid',$mid,'album',$album,'act','dispZend_picasaListPhoto','page',$page)}" class="button green strong"><span>{$lang->cmd_listphoto}</span></a>
+				</div>
+				<div class="buttonRight">
+					<!--@if($grant->manager)-->
+					<a href="{getUrl('act','dispZend_picasaAddAlbum','mid',$mid)}" class="button green strong"><span>{$lang->cmd_album}</span></a>
+		
+					<a href="{getUrl('act','dispZend_picasaDeletePhoto','mid',$mid,'album',$album,'photoid',$photoid,'page',$page)}" class="button green strong"><span>{$lang->cmd_photodelete}</span></a>
+					<a href="{getUrl('act','dispZend_picasaModifyPhoto','mid',$mid,'album',$album,'photoid',$photoid)}" class="button strong"><span>{$lang->cmd_modify}</span></a>
+					<!--@end-->
+					<!--@if($grant->write_photo)-->
+					<a href="{getUrl('act','dispZend_picasaAddPhoto','mid',$mid,'album',$album)}" class="button green strong"><span>{$lang->cmd_photowrite}</span></a>
+					<!--@end-->
+				</div>
+			</div>
+		</li>
+	</ul>
+
+</div>
+<!--#include("_footer.html")-->
