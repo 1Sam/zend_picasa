@@ -1,0 +1,35 @@
+<include target="_header.html" />
+<!--@if($grant->list)-->
+<!--#include("./_style.gallery.html")-->
+<!--@end-->
+
+<div class="btn-toolbar pull-right" role="toolbar" aria-label="a">
+
+    <div class="btn-group" role="group" aria-label="c">
+		<!--@if($grant->manager)-->
+    	    <a href="{getUrl('act','dispZend_picasaAddAlbum','mid',$mid)}" class="btn btn-default"><span>{$lang->cmd_album}</span></a>
+		<!--@end-->
+
+		<!--@if($grant->manager && $module_info->zend_picasa_caching_interval>0)-->
+			<a href="{getUrl('act','procZend_picasaDeleteCache','mid',$mid,'album',$album,'page',$apage)}" onclick="return confirm('{$lang->confirmdelcache}')" class="bbtn btn-default"><span>{$lang->del_cache}</span></a>
+                <a href="{getUrl('act','procZend_picasaDeleteCache','mid',$mid,'album',$album)}" onclick="return confirm('{$lang->confirmdelcache}')" class="button black strong"><span>{$lang->del_cache}</span></a>
+		<!--@end-->
+    </div>
+</div>
+
+    <div class="clearfix"></div>
+
+<div class="boardNavigation">
+    <ul class="pagination pagination-sm">
+        <li><a href="{getUrl('apage','','division',$division,'last_division',$last_division)}">&laquo; {$lang->first_page}</a></li> 
+        <li loop="$page_no=$page_navigation->getNextPage()" class="active"|cond="$apage==$page_no">
+            <a cond="$apage==$page_no" >{$page_no}</a>
+            <a cond="$apage!=$page_no" href="{getUrl('apage',$page_no,'division',$division,'last_division',$last_division)}">{$page_no}</a>
+        </li>
+        <li><a href="{getUrl('apage',$page_navigation->last_page,'division',$division,'last_division',$last_division)}">{$lang->last_page} &raquo;</a></li>
+    </ul>
+
+</div>
+    <div class="clearfix"></div>
+
+<!--#include("_footer.html")-->
