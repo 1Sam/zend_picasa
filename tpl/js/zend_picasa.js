@@ -235,7 +235,7 @@ var processing_files = 1;
 				
 				if(percent >= 100) {
 					// 피카사로 파일 업로드 진행 상황 표시
-					jQuery(".wfsr2").html(filefullname + bytesLoaded + bytesTotal + ' (' + processing_files + ' / ' + selected_files + ')' +'<br> (피카사로 업로드 중입니다.용량이 큰 파일은 시간이 오래 걸립니다.)');
+					jQuery(".wfsr2").html(filefullname + ' (' + processing_files + ' / ' + selected_files + ')' +'<br> (피카사로 업로드 중입니다.용량이 큰 파일은 시간이 오래 걸립니다.)');
 					$lastopt.text(filename + ' (' + percent + '%)');
 				} else {
 					jQuery(".wfsr2").html(filename + ' (' + percent + '%)');
