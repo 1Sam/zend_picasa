@@ -270,6 +270,7 @@ class zend_picasaController extends zend_picasa {
 	function triggerDisplay(&$output) {
 		if(Context::get('act') == 'dispBoardWrite') {
 			Context::addJsFile('./modules/zend_picasa/tpl/js/zend_picasa.js', NULL, NULL, NULL, 'body');
+			Context::addCssFile('./modules/zend_picasa/tpl/css/zend_picasa.css');
 		}
 	}
 
