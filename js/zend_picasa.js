@@ -1,3 +1,30 @@
+(function($){
+	$('<div class="wfsr2"></div>').appendTo('body');
+})(jQuery);
+
+
+// 링크 이미지가 제대로 보이도록
+// xe/modules/editor/tpl/js/upload.js 의 함수를 수정하였음
+
+function previewFiles(a,b){var c,d,e,f,g,h,i=jQuery;if(!b){if(c=i(a.target).parent().addBack().filter("select").find(">option:selected"),!c.length)return;b=c.attr("value")}b&&is_def(e=uploadedFiles[b])&&(d=i("#"+e.previewAreaID).html("&nbsp;"),d.length&&(f=e.download_url||"",g=f.match(/\.(?:(flv)|(swf)|(wmv|avi|mpe?g|as[fx]|mp3)|(jpe?g|png|gif))$/i),"Y"==e.direct_download&&g?g[1]?h='<embed src="'+request_uri+"common/img/flvplayer.swf?autoStart=false&file="+uploaded_filename+'" width="100%" height="100%" type="application/x-shockwave-flash" />':g[2]?h='<embed src="'+request_uri+f+'" width="100%" height="100%" type="application/x-shockwave-flash"  />':g[3]?h='<embed src="'+request_uri+f+'" width="100%" height="100%" autostart="true" showcontrols="0" />':g[4]&&(h=get_code_img(f)):h='<img src="'+request_uri+'modules/editor/tpl/images/files.gif" border="0" width="100%" height="100%" />',h&&d.html(h)))}
+
+function get_code_img(filename){
+		// 첨부파일이 http로 시작하면 도메인주소값을 비움
+
+		matchs = filename.match(/\/\/lh.*?google.*\.com\/(?:-\w).*\/?(\/.*?\/)/i);
+		//alert(JSON.stringify(match)); 
+		//피카사 이미지와 일반이미지를 미리보기 박스에 표시
+		if(matchs) {
+			filename = filename.replace(matchs[1],'/w70-h70-c/');
+			html = '<img src="'+filename+'" border="0" width="100%" height="100%" />';
+		} else if(filename.match(/http[s]?:\/\//gi)) {
+			html = '<img src="'+filename+'" border="0" width="100%" height="100%" />';
+		} else {
+			html = '<img src="'+request_uri+filename+'" border="0" width="100%" height="100%" />';
+		}
+		return html;
+}
+
 /**
  * @author NAVER (developers@xpressengine.com)
  * @version 0.1.1
@@ -173,6 +200,7 @@ var processing_files = 1;
 		},
 		onFileDialogComplete : function(numFilesSelected, numFilesQueued) {
 			try {
+				jQuery(".wfsr2").show();
 				//alert(JSON.stringify(numFilesQueued));
 				// 업로드할 파일 개수
 				selected_files = numFilesSelected;
@@ -207,10 +235,10 @@ var processing_files = 1;
 				
 				if(percent >= 100) {
 					// 피카사로 파일 업로드 진행 상황 표시
-					jQuery(".wfsr").html(filefullname + ' (' + processing_files + ' / ' + selected_files + ')' +'<br> (피카사로 업로드 중입니다.용량이 큰 파일은 시간이 오래 걸립니다.)').show();
+					jQuery(".wfsr2").html(filefullname + bytesLoaded + bytesTotal + ' (' + processing_files + ' / ' + selected_files + ')' +'<br> (피카사로 업로드 중입니다.용량이 큰 파일은 시간이 오래 걸립니다.)');
 					$lastopt.text(filename + ' (' + percent + '%)');
 				} else {
-					jQuery(".wfsr").html(filename + ' (' + percent + '%)').show();
+					jQuery(".wfsr2").html(filename + ' (' + percent + '%)');
 					$lastopt.text(filename + ' (100%)');
 				}
 
@@ -228,7 +256,13 @@ var processing_files = 1;
 				if(this.getStats().files_queued !== 0) {
 					processing_files = processing_files + 1;
 					this.startUpload();
+
+				} else {
+					//alert(JSON.stringify(processing_files +'//'+selected_files));
+					jQuery(".wfsr2").hide();
+					//processing_files = 1;
 				}
+
 				
 			} catch (e)  {
 				alert(JSON.stringify(e));
@@ -278,13 +312,9 @@ var processing_files = 1;
 				var fileListAreaID = this.settings.fileListAreaID;
 				var uploadTargetSrl = this.settings.uploadTargetSrl;
 				reloadFileList(this.settings);
-				if((selected_files + 1) == processing_files) {
-					jQuery(".wfsr").hide().trigger('cancel_confirm');
-					processing_files = 1;
-				}
 			} catch(e) {
 				alert(JSON.stringify(ex));
-				jQuery(".wfsr").hide().trigger('cancel_confirm');
+				jQuery(".wfsr2").hide();
 				this.debug(ex);
 			}
 		}
@@ -374,135 +404,3 @@ var processing_files = 1;
 		try { document.execCommand('BackgroundImageCache',false,true); } catch(e) { }
 	});
 })(jQuery);
-
-function previewFiles(event, file_srl) {
-	var $opt, $select, $preview, fileinfo, filename, match, html, $=jQuery;
-
-	if(!file_srl) {
-		$opt = $(event.target).parent().addBack().filter('select').find('>option:selected');
-		if(!$opt.length) return;
-
-		file_srl = $opt.attr('value');
-	}
-
-	if(!file_srl || !is_def(fileinfo=uploadedFiles[file_srl])) return;
-
-	$preview = $('#'+fileinfo.previewAreaID).html('&nbsp;');
-	if(!$preview.length) return;
-
-	filename = fileinfo.download_url || '';
-	match    = filename.match(/\.(?:(flv)|(swf)|(wmv|avi|mpe?g|as[fx]|mp3)|(jpe?g|png|gif))$/i);
-
-	if(fileinfo.direct_download != 'Y' || !match) {
-		html = '<img src="'+request_uri+'modules/editor/tpl/images/files.gif" border="0" width="100%" height="100%" />';
-	} else if(match[1]) { // flash video file
-		html = '<embed src="'+request_uri+'common/img/flvplayer.swf?autoStart=false&file='+uploaded_filename+'" width="100%" height="100%" type="application/x-shockwave-flash" />';
-	} else if(match[2]) { // shockwave flash file
-		html = '<embed src="'+request_uri+filename+'" width="100%" height="100%" type="application/x-shockwave-flash"  />';
-	} else if(match[3]) { // movie file
-		html = '<embed src="'+request_uri+filename+'" width="100%" height="100%" autostart="true" showcontrols="0" />';
-	} else if(match[4]) { // image file
-		match = filename.match(/\/\/lh.*?google.*\.com\/(?:-\w).*\/?(\/.*?\/)/i);
-		//alert(JSON.stringify(match)); 
-		//피카사 이미지와 일반이미지를 미리보기 박스에 표시
-		if(match) {
-			filename = filename.replace(match[1],'/w70-h70-c/');
-			html = '<img src="'+filename+'" border="0" width="100%" height="100%" />';
-		} else if(!match) {
-			html = '<img src="'+request_uri+filename+'" border="0" width="100%" height="100%" />';
-		}
-	}
-
-	if(html) $preview.html(html);
-}
-
-function removeUploadedFile(editorSequence) {
-	var settings = uploaderSettings[editorSequence];
-	var fileListAreaID = settings.fileListAreaID;
-	var fileListObj = get_by_id(fileListAreaID);
-	if(!fileListObj) return;
-
-	if(fileListObj.selectedIndex<0) return;
-
-	var file_srls = [];
-	for(var i=0;i<fileListObj.options.length;i++) {
-		if(!fileListObj.options[i].selected) continue;
-		var file_srl = fileListObj.options[i].value;
-		if(!file_srl) continue;
-		file_srls[file_srls.length] = file_srl;
-	}
-
-	if(file_srls.length<1) return;
-
-	var params = {
-		file_srls       : file_srls.join(','),
-		editor_sequence : editorSequence
-	};
-
-	exec_xml("file","procFileDelete", params, function() { reloadFileList(settings); } );
-//jQuery(".wfsr").html('삭제중입니다.').show();
-	//exec_json("file.procFileDelete", params, function() { reloadFileList(settings); } );
-//jQuery(".wfsr").hide().trigger('cancel_confirm');
-
-}
-
-function insertUploadedFile(editorSequence) {
-	var settings = uploaderSettings[editorSequence];
-	var fileListAreaID = settings.fileListAreaID;
-	var fileListObj = get_by_id(fileListAreaID);
-	if(!fileListObj) return;
-
-	var obj;
-
-	if(editorMode[editorSequence]=='preview') return;
-
-	var text = [];
-	for(var i=0;i<fileListObj.options.length;i++) {
-		if(!fileListObj.options[i].selected) continue;
-		var file_srl = fileListObj.options[i].value;
-		if(!file_srl) continue;
-
-		var file = uploadedFiles[file_srl];
-		editorFocus(editorSequence);
-
-		// 바로 링크 가능한 파일의 경우 (이미지, 플래쉬, 동영상 등..)
-		if(file.direct_download == 'Y') {
-			// 이미지 파일의 경우 image_link 컴포넌트 열결
-			if(/\.(jpg|jpeg|png|gif)$/i.test(file.download_url)) {
-				if(loaded_images[file_srl]) {
-					obj = loaded_images[file_srl];
-				}
-				else {
-					obj = new Image();
-					obj.src = file.download_url;
-				}
-				temp_code = '';
-				temp_code += "<img src=\""+file.download_url+"\" alt=\""+file.source_filename+"\"";
-				if(obj.complete === true) { temp_code += " width=\""+obj.width+"\" height=\""+obj.height+"\""; }
-				temp_code += " />\r\n<p><br /></p>\r\n";
-				text.push(temp_code);
-			} else {
-				// 이미지외의 경우는 multimedia_link 컴포넌트 연결
-				text.push("<img src=\"common/img/blank.gif\" editor_component=\"multimedia_link\" multimedia_src=\""+file.download_url+"\" width=\"400\" height=\"320\" style=\"display:block;width:400px;height:320px;border:2px dotted #4371B9;background:url(./modules/editor/components/multimedia_link/tpl/multimedia_link_component.gif) no-repeat center;\" auto_start=\"false\" alt=\"\" />");
-			}
-
-		} else {
-			// binary파일의 경우 url_link 컴포넌트 연결
-			text.push("<a href=\""+file.download_url+"\">"+file.source_filename+"</a>\n");
-		}
-	}
-
-	// html 모드
-	if(editorMode[editorSequence]=='html'){
-		if(text.length>0 && get_by_id('editor_textarea_'+editorSequence))
-		{
-			get_by_id('editor_textarea_'+editorSequence).value += text.join('');
-		}
-
-	// 위지윅 모드
-	}else{
-		var iframe_obj = editorGetIFrame(editorSequence);
-		if(!iframe_obj) return;
-		if(text.length>0) editorReplaceHTML(iframe_obj, text.join(''));
-	}
-}
